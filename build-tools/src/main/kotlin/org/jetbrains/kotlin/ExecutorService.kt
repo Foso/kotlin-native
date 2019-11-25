@@ -36,6 +36,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 /**
  * A replacement of the standard `exec {}`
@@ -398,14 +399,15 @@ private fun deviceLauncher(project: Project) = object : ExecutorService {
 
     private fun targetUDID(): String {
         val out = ByteArrayOutputStream()
-        // FIXME: It seems that idb can't launch idb_companion from the first invoke
-        // probably the companion should be started and connected before
-        for (i in 0..3) {
+        // idb launches idb_companion but doesn't wait for it and just exits.
+        // So relaunch `list-targets` again.
+        for (i in 1..3) {
             project.exec {
                 it.commandLine(idb, "list-targets", "--json")
                 it.standardOutput = out
             }.assertNormalExitValue()
             if (out.toString().trim().isNotEmpty()) break
+            else TimeUnit.SECONDS.sleep(i.toLong())
         }
         return out.toString().run {
             check(isNotEmpty())
