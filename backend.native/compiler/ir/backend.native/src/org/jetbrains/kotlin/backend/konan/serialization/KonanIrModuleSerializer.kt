@@ -21,7 +21,8 @@ private class KonanDeclarationTable(
      */
     override fun tryComputeBackendSpecificUniqId(declaration: IrDeclaration): UniqId? {
         return if (declaration.descriptor.module.isFromInteropLibrary()) {
-            UniqId(declaration.descriptor.getUniqId() ?: error("No uniq id found for ${declaration.descriptor}"))
+            // Property accessor doesn't provide UniqId so we need to get it from the property itself.
+            UniqId(declaration.descriptor.findTopLevelDescriptor().getUniqId() ?: error("No uniq id found for ${declaration.descriptor}"))
         } else {
             null
         }
