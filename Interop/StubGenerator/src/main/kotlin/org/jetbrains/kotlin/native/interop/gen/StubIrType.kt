@@ -38,38 +38,6 @@ class AbbreviatedType(
             "${abbreviatedClassifier.topLevelName}${typeArguments.ifNotEmpty { joinToString(prefix = "<", postfix = ">") } ?: ""}"
 }
 
-// TODO: Consider caching the result of expansion in case of
-//  suboptimal performance.
-fun StubType.getExpandedType(): StubType =
-    when (this) {
-        is ClassifierStubType -> if (typeArguments.isEmpty()) {
-            this
-        } else {
-            ClassifierStubType(
-                    classifier,
-                    typeArguments.map(TypeArgument::expand),
-                    nullable
-            )
-        }
-        is AbbreviatedType -> AbbreviatedType(
-                underlyingType.getExpandedType(),
-                abbreviatedClassifier,
-                typeArguments.map(TypeArgument::expand),
-                nullable)
-        is FunctionalType -> FunctionalType(
-                parameterTypes.map(StubType::getExpandedType),
-                returnType.getExpandedType(),
-                nullable
-        )
-        is TypeParameterType -> this
-}
-
-private fun TypeArgument.expand(): TypeArgument = when (this) {
-    is TypeArgumentStub -> TypeArgumentStub(type.getExpandedType(), variance)
-    TypeArgument.StarProjection -> TypeArgument.StarProjection
-    else -> error("Unknown type argument: $this")
-}
-
 /**
  * @return type from kotlinx.cinterop package
  */

@@ -61,7 +61,7 @@ internal class ModuleMetadataEmitter(
         KmTypeAlias(element.flags, element.alias.topLevelName).apply {
             uniqId = uniqIds.uniqIdForTypeAlias(element)
             underlyingType = element.aliasee.map(shouldExpandTypeAliases = false)
-            expandedType = element.aliasee.getExpandedType().map()
+            expandedType = element.aliasee.map()
         }.let(typeAliases::add)
     }
 
